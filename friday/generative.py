@@ -4,10 +4,27 @@ import time
 from config import BASE_DIR
 from friday.text_helper import translate
 from friday.comunicator import send_communication, write_status_to_file
+import logging
+
+
+def setup_logging():
+    log_folder = os.path.join(BASE_DIR, 'logs')
+    os.makedirs(log_folder, exist_ok=True)
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)  # Livello generale del logger
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.DEBUG)  # Livello di log per la console
+    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    file_handler = logging.FileHandler(os.path.join(log_folder, 'translations.log'))
+    file_handler.setLevel(logging.ERROR)  # Livello di log per il file
+    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
+    logger.addHandler(console_handler)
+    logger.addHandler(file_handler)
 
 
 # SEND RESPONSE
 def save_multiple_translations(request_id, titles):
+    setup_logging()
     output_folder = os.path.join(BASE_DIR, 'output', 'requests', str(request_id))
     os.makedirs(output_folder, exist_ok=True)
     try:
@@ -18,11 +35,13 @@ def save_multiple_translations(request_id, titles):
         write_status_to_file(output_folder, "translations")
     except Exception as e:
         print(f"Errore durante la generazione delle traduzioni: {str(e)}")
+        logging.error(f"Errore durante la generazione delle traduzioni: {str(e)}")
         send_communication(request_id, 'running', 'to_failed')
 
 
 # SEND RESPONSE
 def save_multiple_articles(request_id, titles):
+    setup_logging()
     output_folder = os.path.join(BASE_DIR, 'output', 'requests', str(request_id))
     os.makedirs(output_folder, exist_ok=True)
     try:
@@ -36,6 +55,7 @@ def save_multiple_articles(request_id, titles):
         write_status_to_file(output_folder, "articles")
     except Exception as e:
         print(f"Errore durante la generazione o il salvataggio degli articoli: {str(e)}")
+        logging.error(f"Errore durante la generazione o il salvataggio degli articoli: {str(e)}")
         send_communication(request_id, 'running', 'to_failed')
 
 

@@ -10,3 +10,4 @@ __pycache__/
 .anaconda/
 .ipynb_checkpoints/
 .idea
+logs/
