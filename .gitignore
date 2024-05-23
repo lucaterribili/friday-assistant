@@ -1,0 +1,12 @@
+venv
+output/*
+input/*
+loop.sh
+tester.py
+__pycache__/
+.pipenv/
+.poetry/
+.venv/
+.anaconda/
+.ipynb_checkpoints/
+.idea
