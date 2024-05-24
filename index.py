@@ -1,6 +1,7 @@
 from flask import Flask
 from friday.generative import save_multiple_articles, save_multiple_translations
 from friday.routing import provider_response, provider_request
+from friday.logger import setup_logging
 import threading
 from queue import Queue
 
@@ -8,6 +9,8 @@ app = Flask(__name__)
 
 # Coda delle richieste
 request_queue = Queue()
+
+setup_logging()
 
 
 @app.route('/request', methods=['POST'])

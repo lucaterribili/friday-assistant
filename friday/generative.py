@@ -7,24 +7,9 @@ from friday.comunicator import send_communication, write_status_to_file
 import logging
 
 
-def setup_logging():
-    log_folder = os.path.join(BASE_DIR, 'logs')
-    os.makedirs(log_folder, exist_ok=True)
-    logger = logging.getLogger()
-    logger.setLevel(logging.DEBUG)  # Livello generale del logger
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.DEBUG)  # Livello di log per la console
-    console_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    file_handler = logging.FileHandler(os.path.join(log_folder, 'translations.log'))
-    file_handler.setLevel(logging.ERROR)  # Livello di log per il file
-    file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
-
-
 # SEND RESPONSE
 def save_multiple_translations(request_id, titles):
-    setup_logging()
+    logger = logging.getLogger(__name__)
     output_folder = os.path.join(BASE_DIR, 'output', 'requests', str(request_id))
     os.makedirs(output_folder, exist_ok=True)
     try:
@@ -33,6 +18,7 @@ def save_multiple_translations(request_id, titles):
             generator_sentences(title, 20, request_id)
         send_communication(request_id, 'running', 'to_executed')
         write_status_to_file(output_folder, "translations")
+        logger.info(f"Translations generated successfully for request_id={request_id}")
     except Exception as e:
         print(f"Errore durante la generazione delle traduzioni: {str(e)}")
         logging.error(f"Errore durante la generazione delle traduzioni: {str(e)}")
@@ -41,7 +27,7 @@ def save_multiple_translations(request_id, titles):
 
 # SEND RESPONSE
 def save_multiple_articles(request_id, titles):
-    setup_logging()
+    logger = logging.getLogger(__name__)
     output_folder = os.path.join(BASE_DIR, 'output', 'requests', str(request_id))
     os.makedirs(output_folder, exist_ok=True)
     try:
@@ -53,6 +39,7 @@ def save_multiple_articles(request_id, titles):
             save_article_to_file(filepath, article_content)
         send_communication(request_id, 'running', 'to_executed')
         write_status_to_file(output_folder, "articles")
+        logger.info(f"Articoli generati correttamente per la request_id={request_id}")
     except Exception as e:
         print(f"Errore durante la generazione o il salvataggio degli articoli: {str(e)}")
         logging.error(f"Errore durante la generazione o il salvataggio degli articoli: {str(e)}")
@@ -89,7 +76,9 @@ def generate_article(title):
 
 
 def generator_sentences(topic, number, request_id):
-    cache_path = 'cache/sentences.txt'
+    cache_folder = os.path.join(BASE_DIR, 'cache')
+    os.makedirs(cache_folder, exist_ok=True)
+    cache_path = os.path.join(BASE_DIR, 'cache', 'sentences.txt')
     chat_output = []
     # Avvia la chat
     stream = ollama.chat(
